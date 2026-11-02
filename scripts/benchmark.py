@@ -5,7 +5,13 @@ Measures single-request and batch recommendation latency across sample users.
 
 from __future__ import annotations
 
+import sys
 import time
+from pathlib import Path
+
+# Ensure project root is in sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import numpy as np
 
 from app.hybrid import HybridRecommender
