@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  recommender-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hybrid-recommender-api
+    ports:
+      - "8000:8000"
+    environment:
+      - REC_REDIS_URL=redis://redis:6379
+      - REC_MODEL_DIR=/app/artifacts/model
+      - REC_LOG_LEVEL=INFO
+      - REC_DEFAULT_K=10
+    volumes:
+      - model_artifacts:/app/artifacts/model
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: hybrid-recommender-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  model_artifacts:
+  redis_data:
