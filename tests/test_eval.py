@@ -56,3 +56,4 @@ def test_evaluation_metrics_computation(sample_data):
     assert "NDCG@5" in metrics
     assert "MAP@5" in metrics
     assert "Catalog_Coverage" in metrics
+

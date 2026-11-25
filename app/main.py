@@ -132,8 +132,27 @@ async def lifespan(app: FastAPI):
 
 
 # ---------------------------------------------------------------------------
-# FastAPI Initialization
+# Authentication
 # ---------------------------------------------------------------------------
+
+# Optional API key authentication via header: X-API-Key
+# Set REC_API_KEY env var to enforce authentication; leave empty to allow open access
+_API_KEY = os.getenv("REC_API_KEY")
+
+if _API_KEY:
+    @app.middleware("http")
+    async def api_key_auth_middleware(request: Request, call_next):
+        """Enforce API key authentication if REC_API_KEY is configured."""
+        provided_key = request.headers.get("X-API-Key")
+        if provided_key != _API_KEY:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or missing API key",
+            )
+        response = await call_next(request)
+        return response
+else:
+    logger.info("API key authentication disabled (REC_API_KEY not set)")
 
 app = FastAPI(
     title="Hybrid Recommendation Engine API",
@@ -144,14 +163,44 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS Middleware
+# CORS Middleware - restrict origins in production
+# Default allows localhost:3000 for development; override via REC_CORS_ORIGINS env var
+cors_origins = settings.CORS_ORIGINS if settings.CORS_ORIGINS != ["*"] else ["http://localhost:3000", "http://localhost:8000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["X-Process-Time", "X-Request-ID"],
 )
+
+# Include API versioned router
+from .api.v1 import router as v1_router
+app.include_router(v1_router, prefix="/api/v1")
+
+# Optional API key authentication via header: X-API-Key
+# Set REC_API_KEY env var to enforce authentication; leave empty to allow open access
+_API_KEY = os.getenv("REC_API_KEY")
+
+if _API_KEY:
+    @app.middleware("http")
+    async def api_key_auth_middleware(request: Request, call_next):
+        """Enforce API key authentication if REC_API_KEY is configured."""
+        provided_key = request.headers.get("X-API-Key")
+        if provided_key != _API_KEY:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or missing API key",
+            )
+        response = await call_next(request)
+        return response
+else:
+    logger.info("API key authentication disabled (REC_API_KEY not set)")
+
+
+# Root-level health (non-versioned, for k8s liveness/readiness probes)
 
 
 @app.middleware("http")

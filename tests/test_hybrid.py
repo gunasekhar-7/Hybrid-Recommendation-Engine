@@ -79,3 +79,4 @@ def test_hybrid_recommender_persistence(sample_data):
         orig_recs = rec.recommend(u, n=3)
         load_recs = loaded.recommend(u, n=3)
         assert [r[0] for r in orig_recs] == [r[0] for r in load_recs]
+

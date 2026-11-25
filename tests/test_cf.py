@@ -90,3 +90,4 @@ def test_cf_save_and_load(sample_data):
         assert loaded.method == cf.method
         assert loaded.user_ids == cf.user_ids
         np.testing.assert_array_almost_equal(loaded.user_factors, cf.user_factors)
+

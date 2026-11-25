@@ -63,3 +63,4 @@ $$\text{Score}_{\text{Hybrid}}(u, i) = \alpha_u \hat{s}_{\text{CF}}(u, i) + \bet
 - **Vectorized Top-K**: Instead of sorting the entire catalog in Python loops ($O(N \log N)$), the engine uses `np.argpartition` ($O(N)$) to select top candidates before sorting only the top $K$.
 - **BLAS Acceleration**: Matrix operations are offloaded to optimized OpenBLAS/MKL routines.
 - **Asynchronous Non-Blocking API**: FastAPI threadpool execution ensures CPU-intensive scoring never blocks health probes or the asyncio event loop.
+

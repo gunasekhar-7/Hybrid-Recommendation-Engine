@@ -92,3 +92,4 @@ def test_init_endpoint(client):
     data = res.json()
     assert data["status"] == "success"
     assert "fit_info" in data
+
