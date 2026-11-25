@@ -217,3 +217,5 @@ curl -X POST http://localhost:8000/similar-items \
 ├── pyproject.toml            # Build configuration, pytest, and ruff settings
 └── requirements.txt          # Pinned production dependencies
 ```
+
+"# Hybrid-Recommendation-Engine" 
